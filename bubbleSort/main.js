@@ -186,4 +186,3 @@ let newmap = new HashSet();
 console.log(
   newmap.set("Daniel", { name: "John", age: 30, adress: "123 Elonstreet 23" })
 );
-
