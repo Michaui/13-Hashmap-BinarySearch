@@ -85,6 +85,7 @@ class HashMap {
     return false;
   }
 
+  // Hier wird die Länge beschrieben
   length() {
     return this.size;
     // return this.bucket.length(); macht kein sinn,
