@@ -1,5 +1,9 @@
 // BINARY SEARCH TREE 
 
+// Suche: O(log n) im Durchschnitt
+// Einfügen: O(log n) im Durchschnitt
+// Löschen: O(log n) im Durchschnitt
+
 class Node {
   constructor(data, left = null, right = null){
     this.data = data;
@@ -18,20 +22,195 @@ class Tree{
   }
 
   buildTree(array){
-    //Wenn das Array ist, gibt es "null" zurück. 
-    //Der Ausdruck if (!array) return null; prüft, ob array falsy ist (d.h. null, undefined, 0, "", etc.). In diesem Fall wollen wir jedoch nur prüfen, ob das Array leer ist.
+        // console.log(array);
+      /*
+        Wenn das Array ist, gibt es "null" zurück. 
+        Der Ausdruck if (!array) return null; prüft, ob array falsy ist (d.h. null, undefined, 0, "", etc.). In diesem Fall wollen wir jedoch nur prüfen, ob das Array leer ist.
+        Fährt da fort wo der letzte Funktionsaufruf (root.left/right) stattfand, bis return root vollständig am vorherigen Node gesetzt wird. 
+        Return null: node left, right werden auf null gesetzt, wenn array.length 0 ist. 
+      */
     if (array.length === 0) return null; 
     //Finde die Mitte des Arrays
-    const mid = math.floor(array.length/2); 
+    const mid = Math.floor(array.length / 2); 
+        // console.log(mid, array[mid]);
     //Erstellt neuen Knoten mit dem mittleren Wert. 
     const root = new Node(array[mid]); 
+        // console.log(root);
     //Baut rekursiv erst den linken Teilbaum
     root.left = this.buildTree(array.slice(0, mid)); 
+        // console.log("left" + root.left);
     //Baut rekursiv dann den rechten Teilbaum
     root.right = this.buildTree(array.slice(mid + 1)); 
+        // console.log("right" + root.right);
     //gibt den Wurzelknoten des aktuellen Teilbaums zurück
-    return root; 
+        // console.log(root); 
+    /*  
+        Das letzte vollständige Node wird zurückgegeben und an das vorherige Node (node.left) angehangen.
+        Das letzte vollständige Node wird zurückgegeben und an das vorherige Node (node.right) angehangen.
+        rekursiver Rückfluss auf die vorherigen Nodes: bis alle Zahlen als Node gesetzt sind. 
+    */
+    return root;
+  }
+
+
+  // default wird aktueller root node gesetzt, welches dann rekursiv ersetzt wird, wenn Funktion neu aufgerufen wird mit neuen node Werten.
+  insert(value, node = this.root){
+    //Node left, right defaults sind null. Falls dies erreicht wurde, soll neues Node mit Value gesetzt werden. 
+    if (node === null) return new Node(value); 
+      // console.log(value, node.data);
+      // console.log(value, node.left)
+      // console.log(value, node.right)
+    if (value < node.data) 
+      //Wenn value kleiner node, wird der value mit dem linken node aufgerufen 
+      node.left = this.insert(value, node.left); 
+    else 
+      node.right = this.insert(value, node.right);
+      // console.log(node);
+    return node; 
+  }
+
+
+  deleteItem(value, node = this.root){
+    if(node === null) return node; //Wenn neues Node (node.left/right) aus Rekursion === null ist, return node -> Andernfalls führe vergleich fort. 
+          // console.log(value, node.data);
+          // console.log(value, node.left)
+          // console.log(value, node.right)
+    // Wenn value kleiner/größer als Node ist... führe rekursion fort. 
+    if(value < node.data){
+      node.left = this.deleteItem(value, node.left);
+    } else if (value > node.data){
+      node.right = this.deleteItem(value, node.right); 
+    } else { //Wenn Value NICHT größer oder kleiner als node.data, dann else... 
+      //  If/Else Prozess durchlaufen: Wenn Ein Kind-Element "null" ist, gebe Node zurück (Kann Wert oder Null sein). 
+      if (node.left == null) return node.right; // return node.right (Wert oder null) an node.left/right = this.deleteItem(); 
+      if (node.right == null) return node.left; // return node.left (Wert oder null) an node.left/right = this.deleteItem(); 
+      // Ist node.left !== null && node.right !== null, dann wird ein Element aus dem Baum gelöscht wird, welches zwei Kinder hat. 
+      // Finde den kleinsten Wert im rechten Teilbaum und setze diesen auf den aktuellen Knotenwert.
+      node.data = this.findMin(node.right).data; 
+          // console.log(value, node.data);
+          // console.log(value, node.left)
+          // console.log(value, node.right)
+      // löscht den Knoten, der den kleinsten Wert im rechten Teilbaum enthält, da dieser Wert jetzt im aktuellen Knoten steht.
+      node.right = this.deleteItem(node.data, node.right);
+    }
+    return node; // letzter Node wird zurückgegeben
+  }
+
+  findMin(node){
+    // Solange node.left nicht null, setzte node.left auf node. 
+    while (node.left !== null) 
+      node = node.left; 
+      // console.log(node.data);
+    return node; //Schleife Endet, weil node.left == null ist. 
+  }
+
+
+  find(value, node = this.root){
+    // Wenn Node "null" ist oder der aktuelle Node der gesuchte Value ist. 
+    if (node === null || node.data === value) return node; 
+    // Ansonsten Tree durchsuchen. 
+    if (value < node.data) return this.find(value, node.left); 
+    return this.find(value, node.right); 
+  }
+
+
+  // The method should return an array of values if no callback is given as an argument
+  // Verwendet eine Warteschlange, um alle Knoten der aktuellen Ebene zu verarbeiten, bevor zur nächsten Ebene gewechselt wird.
+  levelOrder(callback){
+    const queue = [this.root]; // 1. Initialisiere eine Warteschlange mit der Wurzel des Baums.
+    const result = []; // 2. Initialisiere ein leeres Array, um die Ergebnisse zu speichern.
+
+    while(queue.length){ // 3. Solange die Warteschlange nicht leer ist:
+      const node = queue.shift(); // 4. Entferne den ersten Knoten aus der Warteschlange und speichere ihn in 'node'.
+      /* 
+        Ermöglicht sie es dem Benutzer, eine benutzerdefinierte Operation für jeden Knoten im Baum festzulegen. 
+        Das bedeutet, dass der Benutzer entscheiden kann, welche spezifische Aktion auf jedem Knoten ausgeführt werden soll, 
+        während der Baum in Breitensuche traversiert wird.
+      */
+      if (callback){ // 5. Wenn ein Callback gegeben ist:
+        callback(node); // 6. Führe den Callback mit dem aktuellen Knoten aus.
+      } // else {  
+      /* 
+        7. Wenn kein Callback gegeben ist:
+        Wenn kein callback übergeben wird (if (!callback)), wird der node.data zum result-Array hinzugefügt, 
+        was bedeutet, dass die Methode alle Knotendaten in der Reihenfolge ihres Besuchs speichert.*/
+        result.push(node.data); // 8. Füge den Wert des aktuellen Knotens zum Ergebnis-Array hinzu.
+      //}
+
+      /* 
+        Wenn der aktuelle Knoten Kinder hat (also node.left und/oder node.right nicht null sind), 
+        werden diese Kinder der Queue hinzugefügt, um sie später zu verarbeiten. 
+        Dadurch wird sichergestellt, dass die Methode alle Knoten auf derselben Ebene zuerst verarbeitet, 
+        bevor sie zur nächsten Ebene übergeht.
+      */
+      if (node.left) queue.push(node.left); // 9. Wenn der linke Kindknoten existiert, füge ihn zur Warteschlange hinzu.
+      if (node.right) queue.push(node.right); // 10. Wenn der rechte Kindknoten existiert, füge ihn zur Warteschlange hinzu.
+    }
+    if (!callback) return result; // 11. Wenn kein Callback gegeben ist, gib das Ergebnis-Array zurück.
+  }
+
+
+  inOrder(){
+
+  }
+
+  
+  preOrder(){
+
+  }
+
+
+  postOrder(){
+
+  }
+
+  
+  height(){
+
+  }
+
+
+  depth(){
+
+  }
+
+
+  isBalanced(){
+
+  }
+
+
+  rebalance(){
+
   }
 }
 
 
+let tree = new Tree([4,5,6,3,9,11,23,32,45,67,4,56,97,54,57]); 
+// console.log(tree.root); 
+
+
+/* #### AUFRUFE: DRIVER SCRIPT #### 
+  Create a binary search tree from an array of random numbers < 100. You can create a function that returns an array of random numbers every time you call it if you wish.
+  Confirm that the tree is balanced by calling isBalanced.
+  Print out all elements in level, pre, post, and in order.
+  Unbalance the tree by adding several numbers > 100.
+  Confirm that the tree is unbalanced by calling isBalanced.
+  Balance the tree by calling rebalance.
+  Confirm that the tree is balanced by calling isBalanced.
+  Print out all elements in level, pre, post, and in order.
+*/
+
+// Füge ein Node hinzu
+tree.insert(7); 
+
+//letzter Knoten im Baum
+// tree.deleteItem(7);
+
+// Wenn Knoten Kinderelemente hat. 
+tree.deleteItem(4); 
+
+// Finde bestimmten Wert im Tree und gebe den Node zurück. 
+// console.log(tree.find(5));
+
+//console.log("Level Order:", tree.levelOrder());
