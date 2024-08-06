@@ -29,21 +29,23 @@ class Tree{
         Fährt da fort wo der letzte Funktionsaufruf (root.left/right) stattfand, bis return root vollständig am vorherigen Node gesetzt wird. 
         Return null: node left, right werden auf null gesetzt, wenn array.length 0 ist. 
       */
-    if (array.length === 0) return null; 
+
+    if (array.length === 0) return null; //sobald array.length (root.left/right) 0 ist, wird null returned. 
     //Finde die Mitte des Arrays
     const mid = Math.floor(array.length / 2); 
-        // console.log(mid, array[mid]);
+        //  console.log(mid, array);
+        //  console.log(mid, array[mid]);
     // Erstellt Node mit mittleren Wert, node.left/right default = null; 
     const root = new Node(array[mid]); 
-        // console.log(root);
+        //  console.log(root);
     //Baut rekursiv erst den linken Teilbaum
     root.left = this.buildTree(array.slice(0, mid)); 
-        // console.log("left" + root.left);
+        //  console.log("left " + root.left);
     //Baut rekursiv dann den rechten Teilbaum
     root.right = this.buildTree(array.slice(mid + 1)); 
-        // console.log("right" + root.right);
+        //  console.log("right " + root.right);
     //gibt den Wurzelknoten des aktuellen Teilbaums zurück
-        // console.log(root); 
+        //  console.log(root); 
     /*  
         Das letzte vollständige Node wird zurückgegeben und an das vorherige Node (node.left) angehangen.
         Das letzte vollständige Node wird zurückgegeben und an das vorherige Node (node.right) angehangen.
@@ -57,9 +59,9 @@ class Tree{
   insert(value, node = this.root){
     //Node left, right defaults sind null. Falls dies erreicht wurde, soll neues Node mit Value gesetzt werden. 
     if (node === null) return new Node(value); 
-      // console.log(value, node.data);
-      // console.log(value, node.left)
-      // console.log(value, node.right)
+      console.log(value, node.data);
+      console.log(value, node.left)
+      console.log(value, node.right)
     if (value < node.data) 
       //Wenn value kleiner node, wird der value mit dem linken node aufgerufen 
       node.left = this.insert(value, node.left); 
@@ -312,7 +314,9 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
 };
 
 
-// Zum Start des Projekts: Array wird handisch erstellt. 
+/* 
+  Zum Start des Projekts: Array wird handisch erstellt. 
+*/
 //let tree = new Tree([4,5,6,3,9,11,23,32,45,67,4,56,97,54,57]); 
 // console.log(tree.root); 
 
@@ -323,7 +327,6 @@ function getRandomArray(size, max) {
 
 const array = getRandomArray(15, 100);
 const tree = new Tree(array);
-
 
 
 /* #### AUFRUFE: DRIVER SCRIPT #### 
@@ -338,13 +341,15 @@ const tree = new Tree(array);
 */
 
 // Füge ein Node hinzu
+    // console.log(tree);
 tree.insert(7); 
+    // console.log(tree);
 
 //letzter Knoten im Baum
-// tree.deleteItem(7);
+tree.deleteItem(7);
 
 // Wenn Knoten Kinderelemente hat. 
-tree.deleteItem(4); 
+//tree.deleteItem(4); 
 
 // Finde bestimmten Wert im Tree und gebe den Node zurück. 
 // console.log(tree.find(5));
@@ -353,6 +358,8 @@ tree.deleteItem(4);
   Wenn tree.levelOrder(createSearchNodeCallback(5)) aufgerufen wird, übergibst du levelOrder eine Funktion, 
   die in createSearchNodeCallback erzeugt wurde. Diese erzeugte Funktion nimmt einen Parameter (node).
 */
+  // console.log(tree);  
+  // console.log(tree.levelOrder());
 // console.log("Level Order:", tree.levelOrder(searchNode(54))); //levelOrder mit einer Callback-Function 
 // console.log("Found Node: " + foundNode) //Callback-Ergebnis
 
@@ -360,11 +367,12 @@ tree.deleteItem(4);
 /*
   Reihenfolge: linker Teilbaum, rechter Teilbaum, Wurzel
   Ohne Callback: 
-  Mit Callback: Auch wenn inOrder das Node defailt mit this.root definiert ist, muss aufgrund der Reihenfolge das Root im 
+  Mit Callback: Auch wenn inOrder das Node default mit this.root definiert ist, muss aufgrund der Reihenfolge das Root im 
   Funktionsaufruf angegeben werden, weil sonst die Reihenfolge nicht passt und die Callback-Funktion auf das Root 
   direkt durchgeführt wird.  
 */
-// console.log(tree.inOrder()); 
+  // console.log(tree);
+  // console.log(tree.inOrder()); 
 // console.log(tree.inOrder(tree.root, searchNode(54))); 
 // console.log("Found Node: " + foundNode) //Callback-Ergebnis
 
