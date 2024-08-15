@@ -59,9 +59,9 @@ class Tree{
   insert(value, node = this.root){
     //Node left, right defaults sind null. Falls dies erreicht wurde, soll neues Node mit Value gesetzt werden. 
     if (node === null) return new Node(value); 
-      console.log(value, node.data);
-      console.log(value, node.left)
-      console.log(value, node.right)
+      //console.log(value, node.data);
+      //console.log(value, node.left)
+      //console.log(value, node.right)
     if (value < node.data) 
       //Wenn value kleiner node, wird der value mit dem linken node aufgerufen 
       node.left = this.insert(value, node.left); 
@@ -304,7 +304,10 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
   if (node === null) { //Basisbedingung falls node leer ist 
     return;
   }
-  if (node.right !== null) {
+  // Wenn der rechte Kindknoten von node nicht null ist, ruft die Funktion sich selbst rekursiv auf, um den rechten Teilbaum zu drucken:
+  if (node.right !== null) { 
+    // Aktualisiert das prefix für den rechten Teilbaum. Wenn isLeft true ist, wird │ zum prefix hinzugefügt, ansonsten (vier Leerzeichen).
+    //DAS IST EINE REKURSIVE ABFOLGE! 
     prettyPrint(node.right, `${prefix}${isLeft ? "│   " : "    "}`, false);
   }
   console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.data}`);
@@ -312,7 +315,6 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
     prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
   }
 };
-
 
 /* 
   Zum Start des Projekts: Array wird handisch erstellt. 
@@ -342,11 +344,11 @@ const tree = new Tree(array);
 
 // Füge ein Node hinzu
     // console.log(tree);
-tree.insert(7); 
+// tree.insert(7); 
     // console.log(tree);
 
 //letzter Knoten im Baum
-tree.deleteItem(7);
+// tree.deleteItem(7);
 
 // Wenn Knoten Kinderelemente hat. 
 //tree.deleteItem(4); 
@@ -376,11 +378,59 @@ tree.deleteItem(7);
 // console.log(tree.inOrder(tree.root, searchNode(54))); 
 // console.log("Found Node: " + foundNode) //Callback-Ergebnis
 
-
+// ----
 //Reihenfolge: Wurzel, linker Teilbaum, rechter Teilbaum
+// console.log(tree.preOrder(tree.root)); //Ohne Callback
 // console.log(tree.preOrder(tree.root, searchNode(54))); //Mit Callback
 // console.log("Found Node: " + foundNode) //Callback-Ergebnis
 
+console.log(tree.root);
+prettyPrint(tree.root);
+
+// 1. Pre-Order-Durchlauf des Baums und Erzeugen eines Arrays:
+// KANN AUCH ZU inOrder, preOrder, postOrder geändert werden!!! 
+let newOrderArray = tree.inOrder(tree.root);
+
+// 2. FEHLER! Funktion zum Erstellen eines Baums aus einem Pre-Order-Array:
+// Funktioniert nicht, weil in der Funktion arrayToTree versucht wird, die Methode insert auf dem Objekt root aufzurufen, das vom Typ Node ist. 
+// Allerdings hast die Methode insert auf der Klasse Tree und nicht auf der Klasse Node definiert.
+// function arrayToTree(arr) {
+//     if (!arr.length) return null;
+
+//     let root = new Node(arr[0]);
+//     for (let i = 1; i < arr.length; i++) {
+//         root.insert(arr[i]);
+//     }
+//     return root;
+// }
+
+// 2. LÖSUNG: insert-Methode in der Tree-Klasse belassen und die Methode so aufrufen, dass der gesamte Baum dafür verantwortlich ist. 
+// In diesem Fall sicherstellen, dass die insert-Methode von der Tree-Klasse aufgerufen wird:
+
+function arrayToTree(arr) {
+  if (!arr.length) return null;
+
+  let treeZwei = new Tree([]); //Damit die insert-Methode aufgerufen werden kann. 
+  //Erste Stelle aus dem Array wird als Node in tree(auch Array) abgelegt.
+  treeZwei.root = new Node(arr[0]); 
+  // Die Methode insert ist rekursiv aufgebaut. Bei jedem Aufruf von insert wird der aktuelle Knoten (node) überprüft und der Wert entsprechend eingefügt. 
+  for (let i = 1; i < arr.length; i++) {
+    // Der zweite Parameter tree.root gibt den Startpunkt (den aktuellen Wurzelknoten) des Baums an, ab dem die Einfügung erfolgen soll. 
+    //treeZwei.insert(arr[i], treeZwei.root); 
+    treeZwei.insert(arr[i]); 
+  }
+  console.log(treeZwei.root);
+  return treeZwei.root;
+}
+
+// 3. Rekonstruieren des Baums aus dem Pre-Order-Array:
+let newTreeRoot = arrayToTree(newOrderArray);
+
+// 4. Den rekonstruierten Baum mit prettyPrint anzeigen:
+
+prettyPrint(newTreeRoot);
+
+// ----
 
 //Reihenfolge: linker Teilbaum, rechter Teilbaum, Wurzel
 // console.log(tree.postOrder(tree.root)); //Ohne Callback
